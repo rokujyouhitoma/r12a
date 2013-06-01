@@ -1,5 +1,5 @@
 #!/bin/bash 
 
-if [ -d "./r12a" ]; then
+if [ -a "./r12a" ]; then
     ./r12a
 fi
