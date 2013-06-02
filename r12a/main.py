@@ -1,6 +1,5 @@
-#!/usr/bin/env python 
-import sys
 import os
+
 
 try:
     from rpython.rlib.jit import JitDriver, purefunction
@@ -19,16 +18,11 @@ jitdriver = JitDriver(
     reds=['tape'],
     get_printable_location=get_location)
 
-# class Lexer(object):
-#     pass
-
-# class Parser(object):
-#     def __init__(self, lexer):
-#         self.lexer = lexer
 
 @purefunction
 def get_matching_bracket(bracket_map, pc):
     return bracket_map[pc]
+
 
 def mainloop(tokens, bracket_map):
     pc = 0
@@ -58,6 +52,7 @@ def mainloop(tokens, bracket_map):
             pc = get_matching_bracket(bracket_map, pc)
         pc += 1
 
+
 class Tape(object):
     def __init__(self):
         self.thetape = [0]
@@ -76,6 +71,7 @@ class Tape(object):
             self.thetape.append(0)
     def devance(self):
         self.position -= 1
+
 
 @purefunction
 def split(program):
@@ -105,6 +101,7 @@ def parse(program):
             pc += 1
     return parsed, bracket_map
 
+
 def run(fp):
     program_contents = ""
     while True:
@@ -115,6 +112,7 @@ def run(fp):
     os.close(fp)
     tokens, bm = parse(program_contents)
     mainloop(tokens, bm)
+
 
 def repl():
     prompt = "> "
@@ -128,18 +126,18 @@ def repl():
             else:
                 if line != lf:
                     os.write(1, line)
+                    #
+                    from parser import Parser
+                    from lexer import Lexer
+                    parser = Parser(Lexer(line, 0))
+                    print parser.parse()
+                    #
                 os.write(1, prompt)
                 line = os.read(1, 4096)
     except KeyboardInterrupt:
         os.write(1, "\nKeyboardInterrupt\n")
         return
 
-#def target(*args):
-#    return entry_point, None
-
-#def jitpolicy(driver):
-#    from rpython.jit.codewriter.policy import JitPolicy
-#    return JitPolicy()
 
 def _entry_point(argv):
     try:
@@ -149,11 +147,12 @@ def _entry_point(argv):
             run(fd)
             return 0
         else:
-            os.write(1, "no input files")
+            os.write(1, "no input files\n")
             return 1
     except IndexError:
         repl()
         return 1
+
 
 def create_entry_point(config):
     def entry_point(argv):
@@ -161,6 +160,3 @@ def create_entry_point(config):
         #return _entry_point(space, argv)
         return _entry_point(argv)
     return entry_point
-
-#if __name__ == "__main__":
-#    entry_point(sys.argv)
