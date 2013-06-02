@@ -1,13 +1,20 @@
 from rply import ParserGenerator, Token, ParsingError
+from rply.token import BaseBox
 
+
+class BoxInt(BaseBox):
+    def __init__(self, value):
+        self.value = value
+
+    def getint(self):
+        return self.value
 
 class Parser(object):
     def __init__(self, lexer):
         self.lexer = lexer
 
     def parse(self):
-        l = LexerWrapper(self.lexer.tokenize())
-        return self.parser.parse(l, state=self)
+        return self.parser.parse(self.lexer.lex())
 
     pg = ParserGenerator(["NUMBER", "PLUS", "MINUS"],
                          precedence=[("left", ['PLUS', 'MINUS'])],
@@ -34,13 +41,3 @@ class Parser(object):
         return BoxInt(int(p[0].getstr()))
 
     parser = pg.build()
-
-class LexerWrapper(object):
-    def __init__(self, lexer):
-        self.lexer = lexer
-
-    def next(self):
-        try:
-            return self.lexer.next()
-        except StopIteration:
-            return None

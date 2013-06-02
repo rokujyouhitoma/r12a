@@ -1,5 +1,7 @@
 import os
 
+from parser import Parser
+from lexer import Lexer
 
 try:
     from rpython.rlib.jit import JitDriver, purefunction
@@ -9,6 +11,7 @@ except ImportError:
         def jit_merge_point(self,**kw): pass
         def can_enter_jit(self,**kw): pass
     def purefunction(f): return f
+
 
 def get_location(pc, bracket_map, tokens):
     return "%s" % (tokens[pc])
@@ -125,13 +128,9 @@ def repl():
                 pass
             else:
                 if line != lf:
-                    os.write(1, line)
-                    #
-                    from parser import Parser
-                    from lexer import Lexer
-                    parser = Parser(Lexer(line, 0))
-                    print parser.parse()
-                    #
+                    parser = Parser(Lexer(line))
+                    value = parser.parse().getint()
+                    os.write(1, "%s\n" % value)
                 os.write(1, prompt)
                 line = os.read(1, 4096)
     except KeyboardInterrupt:
@@ -156,7 +155,5 @@ def _entry_point(argv):
 
 def create_entry_point(config):
     def entry_point(argv):
-        #space = {}
-        #return _entry_point(space, argv)
         return _entry_point(argv)
     return entry_point
