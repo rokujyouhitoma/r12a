@@ -1,7 +1,7 @@
 import os
 
-from parser import Parser
-from lexer import Lexer
+from parser import Parser, ParserError
+from lexer import Lexer, LexerError
 
 try:
     from rpython.rlib.jit import JitDriver, purefunction
@@ -129,8 +129,13 @@ def repl():
             else:
                 if line != lf:
                     parser = Parser(Lexer(line))
-                    value = parser.parse().getint()
-                    os.write(1, "%s\n" % value)
+                    try:
+                        value = parser.parse().get_value()
+                        os.write(1, "%s\n" % value)
+                    except LexerError:
+                        os.write(1, "Can not eval\n")
+                    except ParserError:
+                        os.write(1, "Can not parse\n")
                 os.write(1, prompt)
                 line = os.read(1, 4096)
     except KeyboardInterrupt:
